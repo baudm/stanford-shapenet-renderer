@@ -7,9 +7,15 @@
 
 import argparse, sys, os
 
+sys.path.insert(0, '.')
+sys.path.insert(0, '/home/darwin/.pyenv/versions/keras/lib/python3.6/site-packages')
+print(sys.path)
+
 parser = argparse.ArgumentParser(description='Renders given obj file by rotation a camera around it.')
 parser.add_argument('--views', type=int, default=30,
                     help='number of views to be rendered')
+parser.add_argument('--cat', type=str,
+                    help='Category')
 parser.add_argument('obj', type=str,
                     help='Path to the obj file to be rendered.')
 parser.add_argument('--output_folder', type=str, default='/tmp',
@@ -153,7 +159,7 @@ cam_constraint.target = b_empty
 
 model_identifier = os.path.basename(os.path.split(os.path.split(args.obj)[0])[0])
 #print((os.path.split(args.obj)))
-fp = os.path.join(args.output_folder, model_identifier, model_identifier)
+fp = os.path.join(args.output_folder, model_identifier)
 scene.render.image_settings.file_format = 'PNG'  # set output format to .png
 
 from math import radians
@@ -167,22 +173,28 @@ rotation_mode = 'XYZ'
 import random
 import math
 
+import kde
+
 b_empty.rotation_euler[1] = radians(random.randint(0, 91))
 
 
 scale_range = math.sqrt(2) - 1
+elevations = kde.rand(args.cat, 'elevation', args.views)
+azimuths = kde.rand(args.cat, 'azimuth', args.views)
 
 for i in range(0, args.views):
     print("Rotation {}, {}".format((stepsize * i), radians(stepsize * i)))
 
-    scene.render.filepath = fp + '_r_{0:03d}'.format(int(i * stepsize))
+
     #depth_file_output.file_slots[0].path = scene.render.filepath + "_depth.png"
     #normal_file_output.file_slots[0].path = scene.render.filepath + "_normal.png"
     #albedo_file_output.file_slots[0].path = scene.render.filepath + "_albedo.png"
 
-    bpy.ops.render.render(write_still=True)  # render still
 
-    b_empty.rotation_euler[2] += radians(stepsize)
-    b_empty.rotation_euler[1] = radians(random.randint(0, 91))
-    s = scale_range * random.random() + 1
+
+    b_empty.rotation_euler[2] = radians(azimuths[i])
+    b_empty.rotation_euler[0] = radians(elevations[i] - 30) #radians(random.randint(0, 91))
+    s = scale_range * random.random() + 0.9
     cam.location = (0, s, 0.6 * s)
+    scene.render.filepath = fp + '_{}_{}_{}.png'.format(azimuths[i], elevations[i], s)
+    bpy.ops.render.render(write_still=True)  # render still
