@@ -174,9 +174,13 @@ import random
 import math
 
 import kde
+import numpy as np
 
-b_empty.rotation_euler[1] = radians(random.randint(0, 91))
+# b_empty.rotation_euler[1] = radians(random.randint(0, 91))
 
+dist_scale_min = 0.9
+dist_scale_max = dist_scale_min * math.sqrt(2)
+dist_scale_range = dist_scale_max - dist_scale_min
 
 scale_range = math.sqrt(2) - 1
 elevations = kde.rand(args.cat, 'elevation', args.views)
@@ -194,7 +198,8 @@ for i in range(0, args.views):
 
     b_empty.rotation_euler[2] = radians(azimuths[i])
     b_empty.rotation_euler[0] = radians(elevations[i] - 30) #radians(random.randint(0, 91))
-    s = scale_range * random.random() + 0.9
+    s = np.random.normal(1, 0.05)
+    # s = scale_range * random.random() + 0.9
     cam.location = (0, s, 0.6 * s)
     scene.render.filepath = fp + '_{}_{}_{}.png'.format(azimuths[i], elevations[i], s)
     bpy.ops.render.render(write_still=True)  # render still
