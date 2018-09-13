@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import gaussian_kde
 import json
 
-with open('/mnt/data/datasets/shapenet/PASCAL3D+_release1.1/all.json', 'r') as f:
+with open('pose.json', 'r') as f:
     obj = json.load(f)
 
 
@@ -30,5 +30,3 @@ def rand(cat, coord, count):
     kdepdf = kde(data, x_grid, bandwidth=0.1)
     return generate_rand_from_pdf(kdepdf, x_grid, count)
 
-if __name__ == '__main__':
-    run()
